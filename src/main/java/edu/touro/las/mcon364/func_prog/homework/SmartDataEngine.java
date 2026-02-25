@@ -2,6 +2,7 @@ package edu.touro.las.mcon364.func_prog.homework;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.*;
 
 /**
@@ -30,7 +31,6 @@ public class SmartDataEngine {
     // ============================================================
 
     /**
-     * TODO:
      * Implement a generic pipeline.
      *
      * Behavior:
@@ -44,7 +44,11 @@ public class SmartDataEngine {
             Function<T, R> mapper,
             Consumer<R> consumer
     ) {
-        // TODO
+        for (T item : input) {
+            if (filter.test(item)) {
+                consumer.accept(mapper.apply(item));
+            }
+        }
     }
 
     // ============================================================
@@ -52,19 +56,17 @@ public class SmartDataEngine {
     // ============================================================
 
     /**
-     * TODO:
      * Implement a safe divide method.
      *
      * - If denominator is 0 → return Optional.empty()
      * - Otherwise return Optional.of(result)
      */
     public static Optional<Double> safeDivide(double a, double b) {
-        // TODO
-        return Optional.empty();
+        if (b == 0) return Optional.empty();
+        else return Optional.of(a / b);
     }
 
     /**
-     * TODO:
      * Use Optional chaining:
      *
      *  - Divide two numbers using safeDivide(...)
@@ -78,8 +80,7 @@ public class SmartDataEngine {
      *  - Use orElse(...) to provide a default value when empty.
      */
     public static double processDivision(double a, double b) {
-        // TODO
-        return 0;
+        return safeDivide(a, b).map(result -> result * 10).orElse(-1.0);
     }
 
     // ============================================================
@@ -87,7 +88,6 @@ public class SmartDataEngine {
     // ============================================================
 
     /**
-     * TODO:
      * Use switch expression with pattern matching.
      *
      * Behavior:
@@ -99,17 +99,12 @@ public class SmartDataEngine {
      * Must use switch expression (arrow syntax).
      */
     public static Object transformObject(Object input) {
-
-        // Example structure (not solution):
-
-        // return switch (input) {
-        //     case Integer i -> ...
-        //     case String s  -> ...
-        //     case Double d  -> ...
-        //     default -> ...
-        // };
-
-        return null;
+        return switch (input) {
+             case Integer i -> i*i;
+             case String s  -> s.toUpperCase();
+             case Double d  -> Math.round(d);
+             default -> "Unsupported";
+        };
     }
 
     // ============================================================
@@ -117,7 +112,6 @@ public class SmartDataEngine {
     // ============================================================
 
     /**
-     * TODO:
      * Create and return a Function<String, Integer>
      * that performs the following transformations in order:
      *
@@ -146,8 +140,10 @@ public class SmartDataEngine {
      */
 
     public static Function<String, Integer> buildStringLengthPipeline() {
-        // TODO
-        return null;
+        Function<String, String> trim = String::trim;
+        Function<String, String> lower = String::toLowerCase;
+        Function<String, Integer> length = String::length;
+        return trim.andThen(lower).andThen(length);
     }
 
     // ============================================================
@@ -187,7 +183,16 @@ public class SmartDataEngine {
      */
 
     public static void runScoreProcessor() {
-        // TODO
+        Supplier<Integer> rand = () -> ThreadLocalRandom.current().nextInt(1, 101);
+        Predicate<Integer> filter = x -> x > 50;
+        Function<Integer, String> mapper = x -> "Score: " + x;
+        Consumer<String> consumer = System.out::println;
+        Consumer<Integer> pipeline = score -> {
+            if (filter.test(score)) consumer.accept(mapper.apply(score));
+        };
+        List<Integer> list = new java.util.ArrayList<>();
+        for (int i=0; i<10; i++) list.add(rand.get());
+        for (Integer score : list) pipeline.accept(score);
     }
 
 }
